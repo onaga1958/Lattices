@@ -54,7 +54,7 @@ class BigBreastCanser(Dataset):
     def prepare_dataset(self):
         data = self._read_data(self.get_raw_path())
         y = (data[:, -1] == 4).astype(np.int)
-        X_raw = data[:, 1:-1]
+        X_raw = data[:, 1:-1].astype(np.int)
 
         with open(self.get_prepared_path(), 'w') as f_out:
             for answer, factors in zip(y, X_raw):
@@ -68,14 +68,14 @@ class BigBreastCanser(Dataset):
 class BigBreastCanserOneHot(BigBreastCanser):
     _name = 'big_breast_cancer_one_hot'
 
-    def _prepare_factor(self, value, ind):
+    def _prepare_factor(self, ind, value):
         return self._make_one_hot(value)
 
 
 class BigBreastCanserLinearThickness(BigBreastCanser):
     _name = 'big_breast_cancer_linear_thickness'
 
-    def _prepare_factor(self, value, ind):
+    def _prepare_factor(self, ind, value):
         if ind == 0:
             return self._make_greater_than_value(value)
         else:
@@ -85,7 +85,7 @@ class BigBreastCanserLinearThickness(BigBreastCanser):
 class BigBreastCanserAllLinear(BigBreastCanser):
     _name = 'big_breast_cancer_all_linear'
 
-    def _prepare_factor(self, value, ind):
+    def _prepare_factor(self, ind, value):
         return self._make_greater_than_value(value)
 
 

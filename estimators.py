@@ -3,9 +3,12 @@ from utils import Namespace
 from sklearn.ensemble import RandomForestClassifier
 from catboost import CatBoostClassifier
 
+import numpy as np
+
 
 class CatBoostWrapper(CatBoostClassifier):
     _param_names = ['iterations']
+    is_lattice = False
 
     def __init__(self, **params):
         super().__init__(random_seed=117, verbose=False, **params)
@@ -30,6 +33,7 @@ class CatBoostWrapper(CatBoostClassifier):
 
 class RandomForestWrapper:
     _param_names = ['n_estimators']
+    is_lattice = False
 
     def __init__(self, **params):
         self._params = params
@@ -61,6 +65,7 @@ class BasicLatticeEstimator:
     _param_names = []
     _POSITIVE = 'positives'
     _NEGATIVE = 'negatives'
+    is_lattice = True
 
     def __init__(self, **params):
         self.set_params(**params)
@@ -102,11 +107,21 @@ class BasicLatticeEstimator:
         self._calculated_stroke[context_name][feature_indexes] = stroke_part
         return stroke_part
 
-    def calculate_support(self, feature_indexes):
-        return self._calculate_stroke_part(feature_indexes, self._POSITIVE)
+    def calculate_support(self, feature_indexes, base_context_name=None):
+        if base_context_name is None:
+            base_context_name = self._POSITIVE
+        return self._calculate_stroke_part(feature_indexes, base_context_name)
 
-    def calculate_confidence(self, feature_indexes):
-        return self._calculate_stroke_part(feature_indexes, self._NEGATIVE)
+    def calculate_confidence(self, feature_indexes, base_context_name=None):
+        if base_context_name is None:
+            base_context_name = self._POSITIVE
+        if base_context_name == self._POSITIVE:
+            stroke_context_name = self._NEGATIVE
+        elif base_context_name == self._NEGATIVE:
+            stroke_context_name = self._POSITIVE
+        else:
+            raise ValueError('Unknown context names: ' + base_context_name)
+        return self._calculate_stroke_part(feature_indexes, stroke_context_name)
 
     @property
     def _positives(self):
@@ -116,26 +131,33 @@ class BasicLatticeEstimator:
     def _negatives(self):
         return self._data[self._NEGATIVE]
 
+    def _get_stats(
+            self, features, calc_support=False, calc_conf=False,
+            base_context_name=None):
+        assert calc_conf or calc_support
+        if base_context_name is None:
+            base_context_name = self._POSITIVE
+        base_context = self._data[base_context_name]
+
+        confidences = np.zeros(len(base_context))
+        supports = np.zeros(len(base_context))
+        for ind, base_features in enumerate(base_context):
+            interseption = build_interseption_indexes(base_features, features)
+            if calc_support:
+                supports[ind] = self.calculate_support(interseption, base_context_name)
+            if calc_conf:
+                confidences[ind] = self.calculate_confidence(interseption, base_context_name)
+
+        return supports, confidences
+
     def _calc_mean_stats(self, features, calc_support=False, calc_conf=False):
         assert calc_conf or calc_support
-        total_support = 0
-        total_confidence = 0
-        for positive in self._positives:
-            interseption = build_interseption_indexes(positive, features)
-            if calc_conf:
-                confidence = self.calculate_confidence(interseption)
-                total_confidence += confidence
-            if calc_support:
-                support = self.calculate_support(interseption)
-                total_support += support
-        mean_support = total_support / len(self._positives)
-        mean_confidence = total_confidence / len(self._positives)
-        result = []
-        if calc_support:
-            result.append(mean_support)
-        if calc_conf:
-            result.append(mean_confidence)
-        return result
+        stat_arrs = self._get_stats(features, calc_support, calc_conf)
+        return [
+            np.mean(stat_arr)
+            for stat_arr, need_calc in zip(stat_arrs, [calc_support, calc_conf])
+            if need_calc
+        ]
 
     @classmethod
     def get_name(cls):
@@ -219,12 +241,143 @@ class MinSupportMaxConfidenceEstimator(BasicLatticeEstimator):
             return 0
 
 
+class MinMeanAndMinSupportMaxConfidenceEstimator(BasicLatticeEstimator):
+    _name = 'MinMeanAndMinSupportMaxConfidence'
+    _param_names = ['min_mean_support', 'min_min_support', 'max_confidence']
+
+    def _predict_on_features(self, features):
+        sups, confs = self._get_stats(features, True, True)
+        if (
+                np.mean(sups) > self._min_mean_support and
+                np.min(sups) > self._min_min_support and
+                np.mean(confs) < self._max_confidence
+                ):
+            return 1
+        else:
+            return 0
+
+
+class MinSupportMaxMaxConfidenceEstimator(BasicLatticeEstimator):
+    _name = 'MinSupportMaxMaxConfidence'
+    _param_names = ['min_support', 'max_confidence']
+
+    def _predict_on_features(self, features):
+        sups, confs = self._get_stats(features, True, True)
+        if (np.mean(sups) > self._min_support and np.max(confs) < self._max_confidence):
+            return 1
+        else:
+            return 0
+
+
+class MinSupportMaxConfidenceQuantileEstimator(BasicLatticeEstimator):
+    _name = 'MinSupportMaxConfidenceQuantile'
+    _param_names = ['min_support', 'max_confidence', 'confidence_quantile']
+
+    def __init__(self, **params):
+        super().__init__(**params)
+        assert self._confidence_quantile >= 0 and self._confidence_quantile <= 1, (
+            'quantile should be in [0, 1] segment'
+        )
+
+    def _predict_on_features(self, features):
+        sups, confs = self._get_stats(features, True, True)
+        arg_quantile = int(len(confs) * self._confidence_quantile)
+        quantile = np.partition(confs, arg_quantile)[arg_quantile]
+
+        if (np.mean(sups) > self._min_support and quantile < self._max_confidence):
+            return 1
+        else:
+            return 0
+
+
+class MinMedianSupportEstimator(BasicLatticeEstimator):
+    _name = 'MinMedianSupport'
+    _param_names = ['min_support']
+
+    def _predict_on_features(self, features):
+        supports = self._get_stats(features, calc_support=True)[0]
+        half = int(len(supports) / 2)
+
+        if np.partition(supports, half)[half] > self._min_support:
+            return 1
+        else:
+            return 0
+
+
+class MinMinSupportEstimator(BasicLatticeEstimator):
+    _name = 'MinMinSupport'
+    _param_names = ['min_support']
+
+    def _predict_on_features(self, features):
+        supports = self._get_stats(features, calc_support=True)[0]
+        half = int(len(supports) / 2)
+
+        if np.min(supports) > self._min_support:
+            return 1
+        else:
+            return 0
+
+
+class PositiveSupportVsNegativeSupportEstimator(BasicLatticeEstimator):
+    _name = 'PositiveSupportVsNegativeSupport'
+
+    def _predict_on_features(self, features):
+        mean_positive_support = np.mean(self._get_stats(
+            features, calc_support=True, base_context_name=self._POSITIVE
+        )[0])
+        mean_negative_support = np.mean(self._get_stats(
+            features, calc_support=True, base_context_name=self._NEGATIVE
+        )[0])
+        if mean_positive_support > mean_negative_support:
+            return 0
+        else:
+            return 1
+
+
+class PositiveConfVsNegativeConfEstimator(BasicLatticeEstimator):
+    _name = 'PositiveConfVsNegativeConf'
+
+    def _predict_on_features(self, features):
+        mean_positive_conf = np.mean(self._get_stats(
+            features, calc_conf=True, base_context_name=self._POSITIVE
+        )[1])
+        mean_negative_conf = np.mean(self._get_stats(
+            features, calc_support=True, base_context_name=self._NEGATIVE
+        )[1])
+        if mean_positive_conf < mean_negative_conf:
+            return 1
+        else:
+            return 0
+
+
+class ConfAndSupNegVsPosEstimator(BasicLatticeEstimator):
+    _name = 'ConfAndSupNegVsPos'
+
+    def _predict_on_features(self, features):
+        mean_positive_support, mean_positive_conf = np.mean(self._get_stats(
+            features, calc_conf=True, base_context_name=self._POSITIVE
+        ), axis=1)
+        mean_negative_support, mean_negative_conf = np.mean(self._get_stats(
+            features, calc_support=True, base_context_name=self._NEGATIVE
+        ), axis=1)
+        if (
+                mean_positive_conf < mean_negative_conf and
+                mean_positive_support > mean_negative_support
+                ):
+            return 1
+        else:
+            return 0
+
+
 class Estimators(Namespace):
     _name_to_value = {
         estimator_cls.get_name(): estimator_cls
         for estimator_cls in [
             CatBoostWrapper, RandomForestWrapper, SimpleEstimator,
             SupportMoreThanConfidenceEstimator, MinSupportEstimator, ReverseMinSupportEstimator,
-            MinSupportMaxConfidenceEstimator,
+            MinSupportMaxConfidenceEstimator, MinMeanAndMinSupportMaxConfidenceEstimator,
+            MinMedianSupportEstimator, MinMinSupportEstimator,
+            MinSupportMaxMaxConfidenceEstimator, MinSupportMaxConfidenceQuantileEstimator,
+            PositiveSupportVsNegativeSupportEstimator, ConfAndSupNegVsPosEstimator,
         ]
     }

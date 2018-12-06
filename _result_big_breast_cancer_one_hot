@@ -1,3 +1,5 @@
+ConfAndSupNegVsPos	{}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+MinMeanAndMinSupportMaxConfidence	{"max_confidence": 0.55, "min_mean_support": 0.1, "min_min_support": 0.01}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
 MinSupport	{"min_support": 0.1}	{"accuracy": 0.34473792394655706, "f1": 0.5115293053881237, "precision": 0.34473792394655706, "recall": 1.0}
 MinSupport	{"min_support": 0.2}	{"accuracy": 0.34473792394655706, "f1": 0.5115293053881237, "precision": 0.34473792394655706, "recall": 1.0}
 MinSupport	{"min_support": 0.3}	{"accuracy": 0.2990133607399795, "f1": 0.45976265802352756, "precision": 0.31367832224117026, "recall": 0.8711313077166736}
@@ -41,6 +43,30 @@ MinSupportMaxConfidence	{"max_confidence": 0.7, "min_support": 0.1}	{"accuracy":
 MinSupportMaxConfidence	{"max_confidence": 0.7, "min_support": 0.2}	{"accuracy": 0.8984172661870502, "f1": 0.8697974618528923, "precision": 0.7725258021245432, "recall": 0.9961538461538462}
 MinSupportMaxConfidence	{"max_confidence": 0.7, "min_support": 0.3}	{"accuracy": 0.8526927029804728, "f1": 0.8014264775326723, "precision": 0.7474888663310331, "recall": 0.8672851538705197}
 MinSupportMaxConfidence	{"max_confidence": 0.7, "min_support": 0.4}	{"accuracy": 0.6781706063720452, "f1": 0.39608206167927595, "precision": 0.5616806292194405, "recall": 0.3076711905980199}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.4, "max_confidence": 0.65, "min_support": 0.1}	{"accuracy": 0.9501932159725204, "f1": 0.9320806607380124, "precision": 0.8795719095719094, "recall": 0.9919967987194879}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.4, "max_confidence": 0.7, "min_support": 0.1}	{"accuracy": 0.9487333619579219, "f1": 0.9302557723668224, "precision": 0.8764069264069263, "recall": 0.9919967987194879}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.4, "max_confidence": 0.75, "min_support": 0.1}	{"accuracy": 0.9428724774581365, "f1": 0.9228982715245412, "precision": 0.8635785893304689, "recall": 0.9919967987194879}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0.6, "min_support": 0.1}	{"accuracy": 0.957567625590382, "f1": 0.9389596081808435, "precision": 0.9285391179533858, "recall": 0.9503355875901915}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0.65, "min_support": 0.1}	{"accuracy": 0.957567625590382, "f1": 0.9389596081808435, "precision": 0.9285391179533858, "recall": 0.9503355875901915}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0.7, "min_support": 0.1}	{"accuracy": 0.9590274796049807, "f1": 0.9412888355044717, "precision": 0.9289823803647334, "recall": 0.9545909067391276}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0.75, "min_support": 0.1}	{"accuracy": 0.957567625590382, "f1": 0.939402870592191, "precision": 0.9253259177796993, "recall": 0.9545909067391276}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0.8, "min_support": 0.1}	{"accuracy": 0.9561077715757836, "f1": 0.9375358056183298, "precision": 0.9216974707550258, "recall": 0.9545909067391276}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.6, "max_confidence": 0.65, "min_support": 0.1}	{"accuracy": 0.9399957063117219, "f1": 0.9088337504737825, "precision": 0.967015503875969, "recall": 0.8577536251816603}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.6, "max_confidence": 0.7, "min_support": 0.1}	{"accuracy": 0.9399957063117219, "f1": 0.9088337504737825, "precision": 0.967015503875969, "recall": 0.8577536251816603}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.6, "max_confidence": 0.75, "min_support": 0.1}	{"accuracy": 0.9399957063117219, "f1": 0.9088337504737825, "precision": 0.967015503875969, "recall": 0.8577536251816603}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.7, "max_confidence": 0.6, "min_support": 0.1}	{"accuracy": 0.8755689136968655, "f1": 0.7873436723886478, "precision": 0.9766284695696461, "recall": 0.6599666544195419}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.7, "max_confidence": 0.7, "min_support": 0.1}	{"accuracy": 0.8755689136968655, "f1": 0.7873436723886478, "precision": 0.9766284695696461, "recall": 0.6599666544195419}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.7, "max_confidence": 0.8, "min_support": 0.1}	{"accuracy": 0.8741090596822669, "f1": 0.7853683637466725, "precision": 0.9709243697478993, "recall": 0.6599666544195419}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.9, "max_confidence": 0.6, "min_support": 0.1}	{"accuracy": 0.651599398883641, "f1": 0.007547169811320756, "precision": 0.2, "recall": 0.0038461538461538464}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.9, "max_confidence": 0.7, "min_support": 0.1}	{"accuracy": 0.651599398883641, "f1": 0.007547169811320756, "precision": 0.2, "recall": 0.0038461538461538464}
+MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.9, "max_confidence": 0.8, "min_support": 0.1}	{"accuracy": 0.651599398883641, "f1": 0.007547169811320756, "precision": 0.2, "recall": 0.0038461538461538464}
+MinSupportMaxMaxConfidence	{"max_confidence": 0.6, "min_support": 0.1}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+MinSupportMaxMaxConfidence	{"max_confidence": 0.7, "min_support": 0.1}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+MinSupportMaxMaxConfidence	{"max_confidence": 0.8, "min_support": 0.1}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+MinSupportMaxMaxConfidence	{"max_confidence": 0.9, "min_support": 0.1}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+MinSupportMaxMaxConfidence	{"max_confidence": 0.95, "min_support": 0.1}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+MinSupportMaxMaxConfidence	{"max_confidence": 0.99, "min_support": 0.1}	{"accuracy": 0.6501395448690425, "f1": 0.0, "precision": 0.0, "recall": 0.0}
+PositiveSupportVsNegativeSupport	{}	{"accuracy": 0.9575139544869042, "f1": 0.9414864282976584, "precision": 0.8965895412289588, "recall": 0.9916630481980026}
 RF	{"n_estimators": 100}	{"accuracy": 0.9613566289825283, "f1": 0.945010678474042, "precision": 0.924303576200761, "recall": 0.9669251480227089}
 RF	{"n_estimators": 200}	{"accuracy": 0.9628057553956835, "f1": 0.9477397437779261, "precision": 0.9254363323335172, "recall": 0.9714706025681636}
 RF	{"n_estimators": 300}	{"accuracy": 0.961377183967112, "f1": 0.9456387336769161, "precision": 0.9251346732083287, "recall": 0.9673039359014968}

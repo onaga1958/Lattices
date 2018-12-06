@@ -50,12 +50,19 @@ def parse_args():
         '-e', '--estimator', choices=Estimators.get_all_names(),
     )
     best.add_argument('-n', '--top_number', default=1, type=int)
+    best.add_argument('-l', '--only_lattice', action='store_true')
     best.add_argument('--unique_names', action='store_true')
     best.set_defaults(analyze_func=ResultsManager.best_accuracy)
 
     graph = analyze_mode.add_parser('graph')
     graph.add_argument(
         '-e', '--estimator', required=True, choices=Estimators.get_all_names(),
+    )
+    graph.add_argument(
+        '-f', '--fixed_parameters', default={}, type=json.loads
+    )
+    graph.add_argument(
+        '-m', '--min_accuracy', default=0, type=float
     )
     graph.set_defaults(analyze_func=ResultsManager.build_accuracy_plot)
 

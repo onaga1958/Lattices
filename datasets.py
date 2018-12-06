@@ -51,10 +51,14 @@ class BigBreastCanser(Dataset):
     def _prepare_factor(self, value, ind):
         raise NotImplementedError()
 
-    def prepare_dataset(self):
+    def get_raw_X_y(self):
         data = self._read_data(self.get_raw_path())
         y = (data[:, -1] == 4).astype(np.int)
         X_raw = data[:, 1:-1].astype(np.int)
+        return X_raw, y
+
+    def prepare_dataset(self):
+        X_raw, y = self.get_raw_X_y()
 
         with open(self.get_prepared_path(), 'w') as f_out:
             for answer, factors in zip(y, X_raw):
@@ -87,6 +91,51 @@ class BigBreastCanserAllLinear(BigBreastCanser):
 
     def _prepare_factor(self, ind, value):
         return self._make_greater_than_value(value)
+
+
+class BigBreastCanserCustom(BigBreastCanser):
+    _name = 'big_breast_cancer_custom'
+
+    def _prepare_factor(self, ind, value):
+        if ind == 0:
+            features = self._make_greater_than_value(value)
+            features[3] = 1 if value == 4 else 0
+            features[6] = 1 if value == 7 else 0
+            return features
+        if ind == 1:
+            features = self._make_greater_than_value(value)[:4]
+            features.append(1 if value >= 5 else 0)
+            features.append(1 if value >= 8 else 0)
+            return features
+        if ind == 2:
+            features = self._make_greater_than_value(value)[:3]
+            features.append(1 if value == 4 else 0)
+            features.append(1 if value >= 5 else 0)
+            features.append(1 if value >= 7 else 0)
+            return features
+        if ind == 3:
+            return self._make_greater_than_value(value)[:7]
+        if ind == 4:
+            return self._make_greater_than_value(value)[:6]
+        if ind == 5:
+            features = self._make_greater_than_value(value)[:6]
+            features.append(1 if value == 10 else 0)
+            return features
+        if ind == 6:
+            features = self._make_greater_than_value(value)[:9]
+            features[2] = 1 if value == 3 else 0
+            features[4] = 1 if value == 5 else 0
+            features[7] = 1 if value == 8 else 0
+            return features
+        if ind == 7:
+            features = self._make_greater_than_value(value)[:4]
+            features.append(1 if value >= 8 else 0)
+            features.append(1 if value == 10 else 0)
+            return features
+        if ind == 8:
+            features = self._make_greater_than_value(value)[:3]
+            features.append(1 if value == 10 else 0)
+            return features
 
 
 class SmallBreasCanser(Dataset):
@@ -123,5 +172,6 @@ class DatasetPreparations(Namespace):
         'one_hot': BigBreastCanserOneHot(),
         'linear_thickness': BigBreastCanserLinearThickness(),
         'all_linear': BigBreastCanserAllLinear(),
+        'custom': BigBreastCanserCustom(),
         'small': SmallBreasCanser(),
     }

@@ -73,6 +73,10 @@ class ResultsManager:
 
     def best_accuracy(self, args):
         candidates = self._get_results(args.estimator)
+        if args.only_lattice:
+            candidates = [
+                cand for cand in candidates if Estimators.get_value(cand.name).is_lattice
+            ]
         sorted_indexes = np.argsort([cand.accuracy for cand in candidates])
         if args.unique_names:
             printed = set()
@@ -98,29 +102,48 @@ class ResultsManager:
     def build_accuracy_plot(self, args):
         name = args.estimator
         param_names = Estimators.get_value(name).get_param_names()
-        candidates = self._get_results(name)
-        if len(param_names) == 1:
+        params_to_vary = [name for name in param_names if name not in args.fixed_parameters]
+        if len(params_to_vary) not in [1, 2]:
+            print(
+                'Can build plot only if number of not fixed params is equal to 1 or 2.\n'
+                'Param names: ' + str(param_names) + '\nNot fixed params: ' + str(params_to_vary)
+            )
+            return
+
+        candidates = [
+            result
+            for result in self._get_results(name)
+            if all(
+                result.get_param(name) == fixed_value
+                for name, fixed_value in args.fixed_parameters.items()
+            ) and result.accuracy >= args.min_accuracy
+        ]
+        if len(candidates) == 0:
+            print('There are no suitable candidates')
+            return
+
+        if len(params_to_vary) == 1:
             accuracies = [cand.accuracy for cand in candidates]
-            param_values = [cand.get_param(param_names[0]) for cand in candidates]
+            param_values = [cand.get_param(params_to_vary[0]) for cand in candidates]
             plt.plot(param_values, accuracies)
-        if len(param_names) == 2:
+        if len(params_to_vary) == 2:
             sorted_first, first_ind_dict = self._build_info(
-                [cand.get_param(param_names[0]) for cand in candidates]
+                [cand.get_param(params_to_vary[0]) for cand in candidates]
             )
             sorted_second, second_ind_dict = self._build_info(
-                [cand.get_param(param_names[1]) for cand in candidates]
+                [cand.get_param(params_to_vary[1]) for cand in candidates]
             )
-            table = [[None for _ in sorted_first] for _ in sorted_second]
+            table = np.array([[np.nan for _ in sorted_first] for _ in sorted_second])
             # mask = [[True for _ in sorted_second] for _ in sorted_first]
             for cand in candidates:
-                first_ind = first_ind_dict[cand.get_param(param_names[0])]
-                second_ind = second_ind_dict[cand.get_param(param_names[1])]
+                first_ind = first_ind_dict[cand.get_param(params_to_vary[0])]
+                second_ind = second_ind_dict[cand.get_param(params_to_vary[1])]
                 table[second_ind][first_ind] = cand.accuracy
                 # mask[second_ind][first_ind] = False
             sns.heatmap(
                 table, xticklabels=sorted_first, yticklabels=sorted_second,  # mask=mask,
             )
-            plt.ylabel(param_names[1])
-        plt.xlabel(param_names[0])
+            plt.ylabel(params_to_vary[1])
+        plt.xlabel(params_to_vary[0])
         plt.title(name)
         plt.show()

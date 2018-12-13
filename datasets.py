@@ -69,6 +69,13 @@ class BigBreastCanser(Dataset):
                 f_out.write('\n')
 
 
+class BigBreastCanserRaw(BigBreastCanser):
+    _name = 'big_breast_cancer_raw'
+
+    def _prepare_factor(self, ind, value):
+        return [value]
+
+
 class BigBreastCanserOneHot(BigBreastCanser):
     _name = 'big_breast_cancer_one_hot'
 
@@ -173,5 +180,6 @@ class DatasetPreparations(Namespace):
         'linear_thickness': BigBreastCanserLinearThickness(),
         'all_linear': BigBreastCanserAllLinear(),
         'custom': BigBreastCanserCustom(),
+        'raw': BigBreastCanserRaw(),
         'small': SmallBreasCanser(),
     }

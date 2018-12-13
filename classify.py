@@ -40,6 +40,11 @@ def parse_args():
     runner.add_argument('-p', '--params', default={}, type=json.loads)
     runner.set_defaults(func=runner_main)
 
+    fit_all = mode.add_parser('fit_all')
+    fit_all.add_argument('-e', '--estimator', required=True, choices=Estimators.get_all_names())
+    fit_all.add_argument('-p', '--params', default={}, type=json.loads)
+    fit_all.set_defaults(func=fit_all_main)
+
     analyze = mode.add_parser('analyze')
     analyze.add_argument('-e', '--estimator', choices=Estimators.get_all_names())
     analyze.set_defaults(func=analyze_main)
@@ -98,6 +103,12 @@ def runner_main(args, dataset, results_manager):
         results_manager.dump()
     print('done')
     return False
+
+
+def fit_all_main(args, dataset, results_manager):
+    X, y = dataset.get_X_y()
+    estimator = Estimators.get_value(args.estimator)(**args.params)
+    estimator.fit(X, y)
 
 
 def analyze_main(args, dataset, results_manager):

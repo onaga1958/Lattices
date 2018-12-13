@@ -123,6 +123,7 @@ class ResultsManager:
             return
 
         if len(params_to_vary) == 1:
+            candidates = sorted(candidates, key=lambda result: result.get_param(params_to_vary[0]))
             accuracies = [cand.accuracy for cand in candidates]
             param_values = [cand.get_param(params_to_vary[0]) for cand in candidates]
             plt.plot(param_values, accuracies)

@@ -28,13 +28,16 @@ MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0
 MinSupportMaxConfidenceQuantile	{"confidence_quantile": 0.5, "max_confidence": 0.8, "min_support": 0.05}	{"accuracy": 0.9414555603263203, "f1": 0.9133726316821928, "precision": 0.9507840046243837, "recall": 0.8820546581971577}
 PositiveSupportVsNegativeSupport	{}	{"accuracy": 0.34986045513095754, "f1": 0.5175924982492974, "precision": 0.34986045513095754, "recall": 1.0}
 RF	{"n_estimators": 100}	{"accuracy": 0.9721768999570631, "f1": 0.9606024985252004, "precision": 0.9508396792112718, "recall": 0.9711412257210578}
+RF	{"n_estimators": 10}	{"accuracy": 0.9648776298840704, "f1": 0.9500925571724492, "precision": 0.9498238569419015, "recall": 0.9505321310193473}
 RF	{"n_estimators": 200}	{"accuracy": 0.9736474881923574, "f1": 0.9630099059326078, "precision": 0.9555957767722474, "recall": 0.9711412257210578}
 RF	{"n_estimators": 300}	{"accuracy": 0.9707277801631602, "f1": 0.9589282732795466, "precision": 0.9516742081447964, "recall": 0.9668859065721215}
+RF	{"n_estimators": 30}	{"accuracy": 0.9692679261485617, "f1": 0.9563140514731746, "precision": 0.9502069367093362, "recall": 0.9627152366674985}
 RF	{"n_estimators": 400}	{"accuracy": 0.9721876341777588, "f1": 0.9610721611377201, "precision": 0.9520512820512821, "recall": 0.9711412257210578}
 RF	{"n_estimators": 500}	{"accuracy": 0.9707170459424646, "f1": 0.9586647537303128, "precision": 0.9472951844903065, "recall": 0.9711412257210578}
 RF	{"n_estimators": 50}	{"accuracy": 0.9751180764276514, "f1": 0.9647759103641456, "precision": 0.9631094758256575, "recall": 0.9668104917908243}
 RF	{"n_estimators": 600}	{"accuracy": 0.9707277801631602, "f1": 0.9590502244990589, "precision": 0.9471503986209869, "recall": 0.9718859065721215}
 RF	{"n_estimators": 700}	{"accuracy": 0.9707277801631602, "f1": 0.9590502244990589, "precision": 0.9471503986209869, "recall": 0.9718859065721215}
+RF	{"n_estimators": 70}	{"accuracy": 0.9721768999570631, "f1": 0.9602174700198711, "precision": 0.9541710916020627, "recall": 0.9664767412693391}
 RF	{"n_estimators": 800}	{"accuracy": 0.9707277801631602, "f1": 0.9590502244990589, "precision": 0.9471503986209869, "recall": 0.9718859065721215}
 RF	{"n_estimators": 900}	{"accuracy": 0.9707277801631602, "f1": 0.9590502244990589, "precision": 0.9471503986209869, "recall": 0.9718859065721215}
 ReverseMinSupport	{"min_support": 0.1}	{"accuracy": 0.1960820094461142, "f1": 0.30763361028481884, "precision": 0.2202661102176353, "recall": 0.5132677981176104}

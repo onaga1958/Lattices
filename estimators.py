@@ -4,6 +4,7 @@ from sklearn.ensemble import RandomForestClassifier
 from catboost import CatBoostClassifier
 
 import numpy as np
+import os
 
 
 class CatBoostWrapper(CatBoostClassifier):
@@ -281,8 +282,7 @@ class MinSupportMaxConfidenceQuantileEstimator(BasicLatticeEstimator):
 
     def _predict_on_features(self, features):
         sups, confs = self._get_stats(features, True, True)
-        arg_quantile = int(len(confs) * self._confidence_quantile)
-        quantile = np.partition(confs, arg_quantile)[arg_quantile]
+        quantile = np.quantile(confs, self._confidence_quantile)
 
         if (np.mean(sups) > self._min_support and quantile < self._max_confidence):
             return 1
@@ -369,6 +369,113 @@ class ConfAndSupNegVsPosEstimator(BasicLatticeEstimator):
             return 0
 
 
+class BasicRawDataEstimator(BasicLatticeEstimator):
+    _PRINT_THRESHOLDS = os.getenv('PRINT_THRESHOLDS', '0') == '1'
+
+    @property
+    def _positives(self):
+        if not isinstance(self._data[self._POSITIVE], np.ndarray):
+            self._data[self._POSITIVE] = np.array(self._data[self._POSITIVE])
+        return self._data[self._POSITIVE]
+
+    @property
+    def _negatives(self):
+        if not isinstance(self._data[self._NEGATIVE], np.ndarray):
+            self._data[self._NEGATIVE] = np.array(self._data[self._NEGATIVE])
+        return self._data[self._NEGATIVE]
+
+
+class FeatureQuantileEstimator(BasicRawDataEstimator):
+    _name = 'FeatureQuantile'
+    _param_names = ['quantile', 'enough_passed']
+
+    def fit(self, X, y):
+        super().fit(X, y)
+        self._thresholds = np.quantile(self._positives, self._quantile, axis=0)
+        if self._PRINT_THRESHOLDS:
+            print('thresholds:')
+            print(self._thresholds)
+
+    def _predict_on_features(self, features):
+        passed = 0
+        for feature, threshold in zip(features, self._thresholds):
+            if feature > threshold:
+                passed += 1
+        if passed >= self._enough_passed:
+            return 1
+        else:
+            return 0
+
+
+class TwoSideFeatureQuantileEstimator(BasicRawDataEstimator):
+    _name = 'TwoSideFeatureQuantile'
+    _param_names = [
+        'positive_quantile', 'min_positive_passed',
+        'max_negative_passed', 'negative_quantile',
+    ]
+
+    def fit(self, X, y):
+        super().fit(X, y)
+        self._positive_thresholds = np.quantile(self._positives, self._positive_quantile, axis=0)
+        self._negative_thresholds = np.quantile(self._negatives, self._negative_quantile, axis=0)
+
+        if self._PRINT_THRESHOLDS:
+            print('positive_thresholds:')
+            print(self._positive_thresholds)
+            print('negative thresholds:')
+            print(self._negative_thresholds)
+
+    def _predict_on_features(self, features):
+        positive_passed = 0
+        negative_passed = 0
+        for feature, positive_threshold, negative_threshold in zip(
+                features, self._positive_thresholds, self._negative_thresholds):
+            if feature > positive_threshold:
+                positive_passed += 1
+            if feature < negative_threshold:
+                negative_passed += 1
+
+        positive_condition = (
+            positive_passed >= self._min_positive_passed and
+            negative_passed <= self._max_negative_passed
+        )
+        if positive_condition:
+            return 1
+        else:
+            return 0
+
+
+class ComparePositiveAndNegativeFeatureQuantileEstimator(BasicRawDataEstimator):
+    _name = 'ComparePositiveAndNegativeFeatureQuantile'
+    _param_names = ['positive_quantile', 'negative_quantile']
+
+    def fit(self, X, y):
+        super().fit(X, y)
+        self._positive_thresholds = np.quantile(self._positives, self._positive_quantile, axis=0)
+        self._negative_thresholds = np.quantile(self._negatives, self._negative_quantile, axis=0)
+
+        if self._PRINT_THRESHOLDS:
+            print('positive_thresholds:')
+            print(self._positive_thresholds)
+            print('negative thresholds:')
+            print(self._negative_thresholds)
+
+    def _predict_on_features(self, features):
+        positive_passed = 0
+        negative_passed = 0
+        for feature, positive_threshold, negative_threshold in zip(
+                features, self._positive_thresholds, self._negative_thresholds):
+            if feature > positive_threshold:
+                positive_passed += 1
+            if feature < negative_threshold:
+                negative_passed += 1
+
+        if positive_passed > negative_passed:
+            return 1
+        else:
+            return 0
+
+
 class Estimators(Namespace):
     _name_to_value = {
         estimator_cls.get_name(): estimator_cls
@@ -379,5 +486,7 @@ class Estimators(Namespace):
             MinMedianSupportEstimator, MinMinSupportEstimator,
             MinSupportMaxMaxConfidenceEstimator, MinSupportMaxConfidenceQuantileEstimator,
             PositiveSupportVsNegativeSupportEstimator, ConfAndSupNegVsPosEstimator,
+            FeatureQuantileEstimator, TwoSideFeatureQuantileEstimator,
+            ComparePositiveAndNegativeFeatureQuantileEstimator,
         ]
     }

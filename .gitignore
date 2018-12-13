@@ -1,0 +1,4 @@
+*__pycache__*
+*.pyc
+prepared_*.csv
+catboost_info/*
